@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  #container {
+    /* width: 400px;
+    height: 400px; */
+    position: relative;
+    background: black;
+    display: none;
+  }
+  #ball {
+    position: absolute;
+    background-color: yellow;
+    border-radius: 50%;
+    left: 0px;
+    top: 0px;
+    /*color: white;*/
+  }
+</style>
+</head>
+
+<body>
+
+<h1>My Bouncing Ball</h1>
+<p id="pCurrentPoint">0</p>
+
+<button id="btnStartBouncing" onclick="startBouncing()">Start bouncing</button>
+<button id="btnStopBouncing" disabled onclick="stopBouncing()">Stop bouncing</button>
+
+<br />
+<br />
+ 
+<div id="container">
+  <div id="ball"></div>
+</div>
+
+<script>
+  const myContainerWidth = 500; // px
+  const myContainerHeight = 500; // px
+  const myBallRadius = 5; // px
+  const myMilisecondsSpeed = 10;
+
+  setButtons(false);
+  setContainer();
+  setBall();
+
+  function setButtons(pStartedBouncingFlag) {
+    var myStartBouncingButton = document.getElementById("btnStartBouncing");
+    var myStopBouncingButton = document.getElementById("btnStopBouncing");
+
+    myStartBouncingButton.disabled = pStartedBouncingFlag;
+    myStopBouncingButton.disabled = !pStartedBouncingFlag;
+  }
+  function setContainer() {
+    var myContainer = document.getElementById("container");
+    myContainer.style.width = myContainerWidth + "px";
+    myContainer.style.height = myContainerHeight + "px";
+    myContainer.style.display = "block";
+  }
+  function setBall() {
+    var myBall = document.getElementById("ball");
+    myBall.style.width = myBallRadius * 2 + "px";
+    myBall.style.height = myBallRadius * 2 + "px";
+  }
+
+  // Get random Point A (xa, ya) and B (xb, yb)
+  //var myPointA = getPointRandom();
+  //var myPointB = getPointRandom();
+  function getPointRandom() {
+    var myPoint = {x:0, y:0};
+    myPoint.x = (Math.random() * myContainerWidth) - (myBallRadius * 2);
+    myPoint.y = (Math.random() * myContainerHeight) - (myBallRadius * 2);
+    return myPoint;
+  }
+  // Math references
+  /*
+    https://www.mathsisfun.com/algebra/line-equation-2points.html
+    Step 1: Find the Slope (or Gradient) from 2 Points;
+      m = (ya - yb) / (xa - xb)
+    Step 2: The "Point-Slope Formula"
+      y - y1 = m (x - x1)
+    Step 3: Simplify
+      y = mx + b
+    The Big Exception: vertical line: xa and xb the same; m = undefined
+    So, x = xa (constant)
+  */
+  var my_mSlop;
+  var my_y;
+  var my_x;
+  function get_mSlope(pPointA, pPointB) {
+    var m = (pPointA.y - pPointB.y) / (pPointA.x - pPointB.x);
+    return m;
+  }
+  function increaseByXFlag(p_mSlop) {
+    var myFlag = (isFinite(p_mSlop) && Math.abs(p_mSlop) <= 1.00); // this means x line is equal or larger than y
+    return myFlag;
+  }
+  function getIncrement(pPointA, pPointB, p_increaseByXFlag) {
+    var myScalarPointA = (p_increaseByXFlag) ? pPointA.x : pPointA.y;
+    var myScalarPointB = (p_increaseByXFlag) ? pPointB.x : pPointB.y;
+    var myIncrement = (myScalarPointA < myScalarPointB) ? 0.5 : -0.5; // px
+    return myIncrement;
+  }
+  function getYbasedonX(pPointA, p_mSlop, px) {
+    // y - y1 = m (x - x1)
+    // y = m (x - x1) + y1
+    var y = p_mSlop * (px - pPointA.x) + pPointA.y;
+    return y;
+  }
+  function getXbasedonY(pPointA, p_mSlop, py) {
+    // y - y1 = m (x - x1)
+    // x - x1 = (y - y1) / m
+    // x = ((y - y1) / m) + x1
+    var x = ((py - pPointA.y) / p_mSlop) + pPointA.x;
+    return x;
+  }
+  function NeedReboundFlag(my_x, my_y) {
+    var my_x_Limit = myContainerWidth - (myBallRadius * 2);
+    var my_y_Limit = myContainerHeight - (myBallRadius * 2);
+    var my_x_LimitFlag = (my_x >= my_x_Limit);
+    var my_y_LimitFlag = (my_y >= my_y_Limit);
+
+    return (my_x_LimitFlag || my_y_LimitFlag);
+  }
+
+  var myIntervalID;
+
+  function startBouncing() {
+    setButtons(true);
+    var myPointA = getPointRandom();
+    var myPointB = getPointRandom();
+    myPointA.x = 20;
+    myPointA.y = 20;
+    myPointB.x = 100;
+    myPointB.y = 100;
+    my_mSlop = get_mSlope(myPointA, myPointB);
+    var myIncreaseByXFlag = increaseByXFlag(my_mSlop);
+    var myIncrement = getIncrement(myPointA, myPointB, myIncreaseByXFlag); //px
+    alert(my_mSlop + " - " + myIncreaseByXFlag + " - " + myIncrement);
+
+    if (myIncreaseByXFlag) {
+      my_x = myPointA.x;
+    } else {
+      my_y = myPointA.y;
+    }
+
+    var myBall = document.getElementById("ball");   
+    var mCurrentPoint = document.getElementById("pCurrentPoint");   
+    myIntervalID = setInterval(bouncingLogic, myMilisecondsSpeed);
+
+    function bouncingLogic() {
+        if (myIncreaseByXFlag) {
+          my_x += myIncrement;
+          my_y = getYbasedonX(myPointA, my_mSlop, my_x);
+        } else {
+          my_y += myIncrement;
+          my_x = getXbasedonY(myPointA, my_mSlop, my_y);
+        }
+        myBall.style.left = my_x + "px";
+        myBall.style.top = my_y + "px";
+        mCurrentPoint.innerHTML = "(" + my_x + ", " + my_y + ")";
+        var myReboundFlag = NeedReboundFlag(my_x, my_y);
+        if (myReboundFlag) clearInterval(myIntervalID);
+        // TO DO
+        // Calculate rebound
+        //myOwnSleep(myMilisecondsSpeed);
+    }
+  }
+
+  function stopBouncing() {
+    setButtons(false);
+    clearInterval(myIntervalID);
+  }
+
+  // *** Unused code ***
+  function myMoveORIG() {
+    setContainer();
+    setBall();
+
+    var elem = document.getElementById("ball");   
+    var myCount = document.getElementById("pCount");   
+
+    var pos = 0;
+    var id = setInterval(frame, 5);
+    function frame() {
+      if (pos == 350) {
+        clearInterval(id);
+      } else {
+        pos++; 
+        elem.style.top = pos + "px"; 
+        elem.style.left = pos + "px"; 
+        myCount.innerHTML = pos;
+      }
+      //console.log(pos);
+    }
+  }
+
+
+  function myOwnSleep(pMiliseconds) {
+    var myInitialMilisenconds = Date.now();
+    var myCurrentMiliseconds;
+    var myDiffMiliseconds;
+
+    do {
+        myCurrentMiliseconds = Date.now();
+        myDiffMiliseconds = myCurrentMiliseconds - myInitialMilisenconds;
+    } while (myDiffMiliseconds < pMiliseconds);
+  } 
+</script>

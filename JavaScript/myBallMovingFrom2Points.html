@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* my CSS */
+  #divContainer {
+    position: relative;
+    background: black;
+  }
+  #divBall, #divPontA, #divPontB {
+    display: none;
+    position: absolute;
+    /* background-color: yellow; */
+    border-radius: 50%;
+    left: 0px;
+    top: 0px;
+    color: white;
+  }
+</style>
+</head>
+
+<body>
+<!-- *** my HTML *** -->
+<h1>My Ball Moving Between 2 Points</h1>
+<p>Get two random points to move in a straight line by using the Equation of a Line.</p>
+<p><strong>Note:</strong> This is the initial step/idea for Bouncing Ball.</p>
+
+<button id="btnPlay" onclick="Play()">Play</button>
+<button id="btnPause" disabled onclick="Pause()">Pause</button>
+
+<br />
+<br />
+ 
+<div id="divContainer">
+  <div id="divPontA">&nbsp;&nbsp;A</div>
+  <div id="divBall"></div>
+  <div id="divPontB">&nbsp;&nbsp;B</div>
+</div>
+
+<script>
+  // *** my JavaScript code ***
+  //  *** Buttons control ***
+  setButtons(false); // Play enabled / Pause disable
+  function setButtons(pPlayFlag) {
+    let myPlayButton = document.getElementById("btnPlay");
+    let myPauseButton = document.getElementById("btnPause");
+
+    myPlayButton.disabled = pPlayFlag;
+    myPauseButton.disabled = !pPlayFlag;
+  }
+  // *** Container control ***
+  const cContainer = {
+    width: 500, // px
+    height: 500 // px
+  };
+  var myContainer = document.getElementById("divContainer");
+  setObjectDimension(myContainer, cContainer); // set Container dimension
+
+  function setObjectDimension(pObject, cObjDimension) {
+    pObject.style.width = cObjDimension.width + "px";
+    pObject.style.height = cObjDimension.height + "px";
+
+  }
+  // *** Ball control ***
+  const cRadius = 5; // px
+  const cBall = {
+    radious: cRadius,
+    width: cRadius * 2,
+    height: cRadius * 2,
+    milisecondsSpeed: 2
+  };
+  var myPontA = document.getElementById("divPontA");
+  var myBall = document.getElementById("divBall");
+  var myPontB = document.getElementById("divPontB");
+  var myObjectBall = {
+    pointA: {x:0, y:0},
+    pointB: {x:0, y:0},
+    slope: 0,
+    angle: 0, // not use yet
+    increaseByXFlag: false,
+    increment: 0,
+    currentPostition: {x:0, y:0}
+  };
+  setObjectDimension(myPontA, cBall); // set PointA dimension
+  setObjectDimension(myBall, cBall); // set Ball dimension
+  setObjectDimension(myPontB, cBall); // set PointA dimension
+
+  var myFirstTimeFlag = true;
+  function Play() {
+    setButtons(true); // Play disable / Pause enabled
+    if (myFirstTimeFlag) {
+	    setObjectVisible(myPontA); // set PointA visible
+	    setObjectVisible(myBall); // set Ball visible
+	    setObjectVisible(myPontB); // set PointB visible
+	    initializeBall(myObjectBall);
+    }
+    myFirstTimeFlag = false;
+
+	  function setObjectVisible(pObject) {
+	    pObject.style.display = "block";
+	  }
+
+    myIntervalID = setInterval(movementLogic, cBall.milisecondsSpeed);
+    function movementLogic() {
+      if (myObjectBall.increaseByXFlag) {
+        myObjectBall.currentPostition.x += myObjectBall.increment;
+        myObjectBall.currentPostition.y = getYbasedonX(myObjectBall.pointA, myObjectBall.slope, myObjectBall.currentPostition.x);
+      } else {
+        myObjectBall.currentPostition.y += myObjectBall.increment;
+        myObjectBall.currentPostition.x = getXbasedonY(myObjectBall.pointA, myObjectBall.slope, myObjectBall.currentPostition.y);
+      }
+      myBall.style.left = myObjectBall.currentPostition.x + "px";
+      myBall.style.top = myObjectBall.currentPostition.y + "px";
+
+      let myReachLimitFlag = reachLimitFlag(myObjectBall.currentPostition, myObjectBall.pointB, myObjectBall.increaseByXFlag, myObjectBall.increment);
+      if (myReachLimitFlag) initializeBall(myObjectBall);
+
+		  function getYbasedonX(pPointA, p_mSlope, px) {
+		    // y - y1 = m (x - x1)
+		    // y = m (x - x1) + y1
+		    let y = p_mSlope * (px - pPointA.x) + pPointA.y;
+		    return y;
+		  }
+		  function getXbasedonY(pPointA, p_mSlope, py) {
+		    // y - y1 = m (x - x1)
+		    // x - x1 = (y - y1) / m
+		    // x = ((y - y1) / m) + x1
+		    let x = ((py - pPointA.y) / p_mSlope) + pPointA.x;
+		    return x;
+		  }
+		  function reachLimitFlag(pCurrentPoint, pPointB, pIncreaseByXFlag, pIncrement) {
+		    let myCurrentPointScalar = (pIncreaseByXFlag) ? pCurrentPoint.x : pCurrentPoint.y;
+		    let myPointBScalar = (pIncreaseByXFlag) ? pPointB.x : pPointB.y;
+		      
+		    let myLimitReached = (pIncrement > 0) ? (myCurrentPointScalar >= myPointBScalar) : (myCurrentPointScalar <= myPointBScalar);
+
+		    return myLimitReached;
+		  }
+    }
+	  function initializeBall(pObjectBall) {
+	    pObjectBall.pointA = randomPoint(cContainer, cBall);
+	    do {
+	      pObjectBall.pointB = randomPoint(cContainer, cBall);
+	    } while (Object.entries(pObjectBall.pointA).toString() === Object.entries(pObjectBall.pointB).toString());
+
+	    pObjectBall.slope = getSlope(pObjectBall.pointA, pObjectBall.pointB);
+	    pObjectBall.increaseByXFlag = increaseByXFlag(pObjectBall.slope);
+	    pObjectBall.increment = getIncrement(pObjectBall.pointA, pObjectBall.pointB, pObjectBall.increaseByXFlag); //px
+	    pObjectBall.currentPostition = Object.assign({}, pObjectBall.pointA); // Copy the values, NOT the reference
+
+	    initializeObject(myPontA, pObjectBall.pointA); // initialize PointA
+	    initializeObject(myBall, pObjectBall.pointA); // initialize Ball
+	    initializeObject(myPontB, pObjectBall.pointB); // initialize PointB
+		
+		  // Get random Point A (xa, ya) and B (xb, yb)
+		  function randomPoint(pContainer, pBall) {
+		    let myPoint = {x:0, y:0};
+		    let myLimit;
+		    myLimit = pContainer.width - pBall.width + 1;
+		    myPoint.x = randomWithLimitAndRound(myLimit);
+		    myLimit = pContainer.height - pBall.height + 1;
+		    myPoint.y = randomWithLimitAndRound(myLimit);
+		    return myPoint;
+		  }
+		  // Math references
+		  /*
+		    https://www.mathsisfun.com/algebra/line-equation-2points.html
+		    Step 1: Find the Slope (or Gradient) from 2 Points;
+		      m = (ya - yb) / (xa - xb)
+		    Step 2: The "Point-Slope Formula"
+		      y - y1 = m (x - x1)
+		    Step 3: Simplify
+		      y = mx + b
+		    The Big Exception: vertical line: xa and xb the same; m = undefined
+		    So, x = xa (constant)
+		  */
+		  function getSlope(pPointA, pPointB) {
+		    let m = (pPointA.y - pPointB.y) / (pPointA.x - pPointB.x);
+		    return m;
+		  }
+		  function increaseByXFlag(p_mSlope) {
+		    let myFlag = (isFinite(p_mSlope) && Math.abs(p_mSlope) <= 1.00); // this means x line is equal or larger than y
+		    return myFlag;
+		  }
+		  function getIncrement(pPointA, pPointB, p_increaseByXFlag) {
+		    let myScalarPointA = (p_increaseByXFlag) ? pPointA.x : pPointA.y;
+		    let myScalarPointB = (p_increaseByXFlag) ? pPointB.x : pPointB.y;
+		    let myIncrement = (myScalarPointA < myScalarPointB) ? 0.5 : -0.5; // px
+		    return myIncrement;
+		  }
+			function initializeObject(pObject, pPont) {
+		    pObject.style.left = pPont.x + "px";
+		    pObject.style.top = pPont.y + "px";
+		    pObject.style.backgroundColor = randomRGBColor();
+
+	      function randomRGBColor() {
+	        const cColorLimit = 255;
+	        const cMinColorValue = Math.round(cColorLimit / 2);
+	        let myRed, myGreen, myBlue;
+	        let myGreaterValue = 0; // to set the first greates value to minimize looping
+	        // to make sure ball in not BLACK to be visible in the container
+	        do {
+	          myRed = (myRed == myGreaterValue) ? myGreaterValue : randomWithLimitAndRound(cColorLimit + 1);
+	          myGreen = (myGreen == myGreaterValue) ? myGreaterValue : randomWithLimitAndRound(cColorLimit + 1);
+	          myBlue = (myBlue == myGreaterValue) ? myGreaterValue : randomWithLimitAndRound(cColorLimit + 1);
+	          myGreaterValue = (myGreaterValue == 0) ? Math.max(myRed, myGreen, myBlue) : myGreaterValue;
+	        } while ((myRed + myGreen + myBlue) < cMinColorValue);
+	        let myRGB = "rgb(" + myRed + "," + myGreen + "," + myBlue + ")";
+	        return myRGB;
+	      }
+			}
+	  }
+  }
+  // alert(Object.values(myObjectBall.pointA));
+  // alert(Object.entries(myObjectBall.pointA).toString());
+
+  // Random common function 
+  function randomWithLimitAndRound(pLimit) {
+    let myRoundRandomValue = Math.floor(Math.random() * pLimit);
+    return myRoundRandomValue;
+  }
+  // This will be used for bouncing ball
+  // Not used for now
+  function needReboundFlag(px, py) {
+    let myLowLimit = 0; // for both x and y
+    let myHighLimit = cContainer.width - cBall.width; // starting for x
+    let my_x_LimitFlag = (px <= myLowLimit || px >= myHighLimit);
+
+    myHighLimit = cContainer.height - cBall.height; // for y
+    let my_y_LimitFlag = (py <= myLowLimit || py >= myHighLimit);
+
+    return (my_x_LimitFlag || my_y_LimitFlag);
+  }
+
+  function Pause() {
+    setButtons(false); // Play enabled / Pause disable
+    clearInterval(myIntervalID);
+  }
+</script>
