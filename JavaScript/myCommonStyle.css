@@ -1,0 +1,14 @@
+/* my CSS */
+#divContainer {
+  position: relative;
+  background: black;
+}
+
+#divBall, #divPontA, #divPontB {
+  visibility: hidden;
+  position: absolute;
+  border-radius: 50%;
+  left: 0px;
+  top: 0px;
+  color: white;
+}
