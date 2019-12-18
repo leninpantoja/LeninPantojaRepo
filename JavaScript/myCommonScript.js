@@ -23,16 +23,17 @@ let myContainer = document.getElementById("divContainer");
 setObjectVisibleAndDimension(myContainer, cContainer); // set Container dimension
 function setObjectVisibleAndDimension(pObject, cDimensions) {
 	pObject.style.visibility = "visible";
-  pObject.style.width = cDimensions.width + "px";
-  pObject.style.height = cDimensions.height + "px";
+	let myWidth = (typeof(cDimensions.width) === 'undefined') ? cDimensions.diameter : cDimensions.width;
+	let myHeight = (typeof(cDimensions.height) === 'undefined') ? cDimensions.diameter : cDimensions.height;
+  pObject.style.width = myWidth + "px";
+  pObject.style.height = myHeight + "px";
 }
 
 // *** Ball control ***
 const cRadius = 5; // px
 const cBall = {
-  radious: cRadius,
-  width: cRadius * 2,
-  height: cRadius * 2,
+  radius: cRadius,
+  diameter: cRadius * 2,
   increment: 1, // px
   milisecondsSpeed: 5
 };
@@ -44,18 +45,15 @@ var myPontB = document.getElementById("divPontB");
 setObjectVisibleAndDimension(myBall, cBall); // set Ball dimension
 if (myVersion1Flag) { // just version1 shows all the points, A, B, and Current point
 	setObjectVisibleAndDimension(myPontA, cBall); // set PointA dimension
-	setObjectVisibleAndDimension(myPontB, cBall); // set PointA dimension
+	setObjectVisibleAndDimension(myPontB, cBall); // set PointB dimension
 }
 
 // Main object that contains all the properties to apply line-equation-2points and determine ball movement
 var myMainObject = {
   pointA: {x:0, y:0},
   pointB: {x:0, y:0},
-  slope: 0,
   angle: 0,
-  increaseByXFlag: false,
-  increment: 0,
-  currentPostition: {x:0, y:0},
+  currentPoint: {x:0, y:0},
   limitReachedXY: ""
 };
 
@@ -74,7 +72,7 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
   function setMainObject(pMainObject) {
   	// true = Keep reach limit/current point as start Point A; false = Point A as random
   	let myInitFlag = areTwoPointsEqualsFlag(pMainObject.pointA, pMainObject.pointB); // if both points are equal, so this is the ini
-    pMainObject.pointA = (myVersion1Flag || myInitFlag) ? randomPoint(cContainer, cBall) : setObjectPointValues(pMainObject.currentPostition);
+    pMainObject.pointA = (myVersion1Flag || myInitFlag) ? randomPoint(cContainer, cBall) : setObjectPointValues(pMainObject.currentPoint);
     let myReboundAngle = null;
     if (myVersion3Flag && !myInitFlag) {
     	myReboundAngle  = calculateReboundAngle(pMainObject.angle, pMainObject.limitReachedXY);
@@ -86,15 +84,8 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
 	    } while (areTwoPointsEqualsFlag(pMainObject.pointA, pMainObject.pointB));
     }
     // apply math equation and logic to determine ball movement
-    pMainObject.slope = getSlope(pMainObject.pointA, pMainObject.pointB);
-  	//pMainObject.angle = calculateAngleInDegrees(pMainObject.slope);
   	pMainObject.angle = (myReboundAngle == null) ? calculateAngleInDegrees(pMainObject.pointA, pMainObject.pointB) :  myReboundAngle;
-  	//alert("slope = " + pMainObject.slope + "; angle = " + pMainObject.angle);
-    pMainObject.increaseByXFlag = increaseByXFlag(pMainObject.slope);
-    pMainObject.increment = getIncrement(pMainObject.pointA, pMainObject.pointB, pMainObject.increaseByXFlag); //px
-  	// Original assign, but it does not work in ie
-    // pMainObject.currentPostition = Object.assign({}, pMainObject.pointA); // Copy the values, NOT the reference, but it doesnot work in ie
-    pMainObject.currentPostition = setObjectPointValues(pMainObject.pointA); // Copy the values, NOT the reference
+    pMainObject.currentPoint = setObjectPointValues(pMainObject.pointA);
 
     function areTwoPointsEqualsFlag(pPoint1, pPoint2) {
     	// Original Object comparation, but it does not work in ie
@@ -103,29 +94,27 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
     }
 	  // Get random Point A (xa, ya) and B (xb, yb)
 	  function randomPoint(pContainer, pBall) {
-	    let myPoint = {x:0, y:0};
 	    let myLimit;
 
-	    myLimit = pContainer.width - pBall.width + 1;
-	    myPoint.x = randomWithLimitAndRound(myLimit);
+	    myLimit = pContainer.width - pBall.diameter + 1;
+	    let myPointX = randomWithLimitAndRound(myLimit);
 
-	    myLimit = pContainer.height - pBall.height + 1;
-	    myPoint.y = randomWithLimitAndRound(myLimit);
+	    myLimit = pContainer.height - pBall.diameter + 1;
+	    let myPointY = randomWithLimitAndRound(myLimit);
 
-	    return myPoint;
+	    return {x:myPointX, y:myPointY};
 	  }
     function setObjectPointValues(pPoint) {
-	    let myPoint = {x:0, y:0};
-	    myPoint.x = pPoint.x;
-	    myPoint.y = pPoint.y;
-
-    	return myPoint;
+	  	// Original assign, but it does not work in ie
+	    // pMainObject.currentPoint = Object.assign({}, pMainObject.pointA); // Copy the values, NOT the reference, but it doesnot work in ie
+    	return {x:pPoint.x, y:pPoint.y};
     }
     function calculateReboundAngle(pAngle, limitReachedXY) {
-    	// refletion angle: if X, (180 - Angle); otherwise Y, just set negative angle
-    	return (limitReachedXY == "X") ? (180 - pAngle) : - pAngle;
+    	// refletion angle: if x, (180 - Angle); otherwise y, just set negative angle
+    	return (limitReachedXY == "x") ? (180 - pAngle) : - pAngle;
     }
 	  // Math references
+	  // Original idea
 	  /*
 	    https://www.mathsisfun.com/algebra/line-equation-2points.html
 	    Step 1: Find the Slope (or Gradient) from 2 Points;
@@ -137,9 +126,6 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
 	    The Big Exception: vertical line: xa and xb the same; m = undefined
 	    So, x = xa (constant)
 	  */
-	  function getSlope(pPointA, pPointB) {
-	    return (pPointA.y - pPointB.y) / (pPointA.x - pPointB.x);
-	  }
     // Math reference
     /*
     	Find angle according to m slope
@@ -147,27 +133,9 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
      	tan(θ)=m
      	θ=tan−1(m)
     */
-    function calculateAngleInDegrees2(p_mSlope) {
-    	// Convert radians to degrees reference
-			/*
-				https://www.wikihow.com/Convert-Radians-to-Degrees
-				PI * radians = 180 degrees
-				1 radian = 180 degrees / PI
-			*/
-    	return (180 * Math.atan(p_mSlope) / Math.PI);
-    }
 		function calculateAngleInDegrees(pPointA, pPointB) {
 			return (180 * Math.atan2(pPointB.y - pPointA.y, pPointB.x - pPointA.x) / Math.PI);
 		}
-	  function increaseByXFlag(p_mSlope) {
-	    return (isFinite(p_mSlope) && Math.abs(p_mSlope) <= 1.00); // this means x line is equal or larger than y
-	  }
-	  function getIncrement(pPointA, pPointB, p_increaseByXFlag) {
-	    let myScalarPointA = (p_increaseByXFlag) ? pPointA.x : pPointA.y;
-	    let myScalarPointB = (p_increaseByXFlag) ? pPointB.x : pPointB.y;
-
-	    return (myScalarPointA < myScalarPointB) ? 0.5 : -0.5; // px
-	  }
   }
 	function setObjectPositionAndColor(pObject, pPont) {
 		setObjectPosition(pObject, pPont)
@@ -198,8 +166,7 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
 // This is used/shared below
 function setObjectPosition(pObject, pPoint) {
   pObject.style.left = pPoint.x + "px";
-  //pObject.style.top = pPont.y + "px";
- 	pObject.style.top = cContainer.height - pPoint.y - cBall.height + "px";
+ 	pObject.style.top = cContainer.height - pPoint.y - cBall.diameter + "px";
 }
 // *** Execution ***
 Play();
@@ -208,68 +175,57 @@ function Play() {
   myIntervalID = setInterval(movementLogic, cBall.milisecondsSpeed);
 
   function movementLogic() {
-    calculateBallNextMovement(myMainObject);
-		setObjectPosition(myBall, myMainObject.currentPostition); // set Ball Current Position
+    myMainObject.currentPoint = calculateBallNextMovement(myMainObject.currentPoint, cBall.increment, myMainObject.angle);
+		setObjectPosition(myBall, myMainObject.currentPoint); // set Ball Current Position
 
-    let myReachLimitFlag = (myVersion1Flag) ? reachLimitFlag(myMainObject.currentPostition, myMainObject.pointB, myMainObject.increaseByXFlag, myMainObject.increment) : needReboundFlag(cContainer, cBall, myMainObject.currentPostition, myMainObject.pointA);
-    let myXLimitFlag = reachContainerLimitFlag(myMainObject.currentPostition.x, 0, cContainer.width - cBall.width);
-    let myYLimitFlag = reachContainerLimitFlag(myMainObject.currentPostition.y, 0, cContainer.height - cBall.height);
+    //let myReachLimitFlag = (myVersion1Flag) ? reachLimitFlag(myMainObject.currentPoint, myMainObject.pointB, myMainObject.angle) : needReboundFlag(cContainer, cBall, myMainObject.currentPoint, myMainObject.pointA);
+    let myReachLimitFlag;
+    let myXLimitFlag = false;
+    let myYLimitFlag = false;
+    if (myVersion1Flag) {
+			myReachLimitFlag = reachLimitFlag(myMainObject.currentPoint, myMainObject.pointB, myMainObject.angle)
+    } else {
+    	// if rebound, need to know if limit reached on X or Y
+	    myXLimitFlag = reachContainerLimitFlag(myMainObject.currentPoint.x, 0, cContainer.width - cBall.diameter);
+	    myYLimitFlag = reachContainerLimitFlag(myMainObject.currentPoint.y, 0, cContainer.height - cBall.diameter);
+	    myReachLimitFlag = (myXLimitFlag || myYLimitFlag);
+    }
     if (myReachLimitFlag) {
-    	myMainObject.limitReachedXY = (myXLimitFlag) ? "X" : "Y";
+    	myMainObject.limitReachedXY = (myXLimitFlag) ? "x" : "y";
     	setObjects(myMainObject, myPontA, myBall, myPontB);
     }
 
-    function calculateBallNextMovement(pMainObject) {
-      // if (pMainObject.increaseByXFlag) {
-      //   pMainObject.currentPostition.x += pMainObject.increment;
-      //   pMainObject.currentPostition.y = getYbasedonX(pMainObject.pointA, pMainObject.slope, pMainObject.currentPostition.x);
-      // } else {
-      //   pMainObject.currentPostition.y += pMainObject.increment;
-      //   pMainObject.currentPostition.x = getXbasedonY(pMainObject.pointA, pMainObject.slope, pMainObject.currentPostition.y);
-      // }
-			pMainObject.currentPostition = getNewPoint(pMainObject.currentPostition, cBall.increment, pMainObject.angle);
-
+    function calculateBallNextMovement(pPointIni, pDist, pAngle) {
 			// New one by using the angle with Cos/Sin
-      function getNewPoint(pPointIni, pDist, pAngle) {
-      	let myPoint = {x:0, y:0};
-      	myPoint.x = getNewXPoint(pPointIni.x, pDist, pAngle);
-      	myPoint.y = getNewYPoint(pPointIni.y, pDist, pAngle);
-      	return myPoint;
+    	let myPointX = getNewXPoint(pPointIni.x, pDist, pAngle);
+    	let myPointY = getNewYPoint(pPointIni.y, pDist, pAngle);
+    	return {x:myPointX, y:myPointY};
 
-				function getNewXPoint(pxIni, pDist, pAngle) {
-					return (pDist * Math.cos(pAngle * Math.PI / 180)) + pxIni;
-				}
-				function getNewYPoint(pyIni, pDist, pAngle) {
-					return (pDist * Math.sin(pAngle * Math.PI / 180)) + pyIni;
-				}
-      }
-      // Original idea by using slope
-		  function getYbasedonX(pPointA, p_mSlope, px) {
-		    // y - y1 = m (x - x1)
-		    // y = m (x - x1) + y1
-		    return p_mSlope * (px - pPointA.x) + pPointA.y;
-		  }
-		  function getXbasedonY(pPointA, p_mSlope, py) {
-		    // y - y1 = m (x - x1)
-		    // x - x1 = (y - y1) / m
-		    // x = ((y - y1) / m) + x1
-		    return ((py - pPointA.y) / p_mSlope) + pPointA.x;
-		  }
+			function getNewXPoint(pxIni, pDist, pAngle) {
+				return (pDist * Math.cos(pAngle * Math.PI / 180)) + pxIni;
+			}
+			function getNewYPoint(pyIni, pDist, pAngle) {
+				return (pDist * Math.sin(pAngle * Math.PI / 180)) + pyIni;
+			}
     }
-	  function reachLimitFlag(pCurrentPoint, pPointB, pIncreaseByXFlag, pIncrement) {
-	    let myCurrentPointScalar = (pIncreaseByXFlag) ? pCurrentPoint.x : pCurrentPoint.y; // use x or y from CurrentPoint
-	    let myPointBScalar = (pIncreaseByXFlag) ? pPointB.x : pPointB.y; // use x or y from PointB
+	  function reachLimitFlag(pCurrentPoint, pPointB, pAngle) {
+	  	let myABSAngle = Math.abs(pAngle);
+	  	let myCheckByXFlag = (myABSAngle != 90); // consider X if not 90 degrees
+	    let myCurrentPointScalar = (myCheckByXFlag) ? pCurrentPoint.x : pCurrentPoint.y; // use x or y from CurrentPoint
+	    let myPointBScalar = (myCheckByXFlag) ? pPointB.x : pPointB.y; // use x or y from PointB
 	      
-	    return (pIncrement > 0) ? (myCurrentPointScalar >= myPointBScalar) : (myCurrentPointScalar <= myPointBScalar);
+	  	let myPositiveIncrementFlag = (myCheckByXFlag) ? (myABSAngle < 90) : (pAngle > 0);
+
+	    return (myPositiveIncrementFlag > 0) ? (myCurrentPointScalar >= myPointBScalar) : (myCurrentPointScalar <= myPointBScalar);
 	  }
     function needReboundFlag(pContainer, pBall, pCurrentPoint, pPointA) {
     	// pPointA as initial point
       const myLowLimit = 0; // for both x and y
-      let myHighLimit = pContainer.width - pBall.width; // starting for x
+      let myHighLimit = pContainer.width - pBall.diameter; // starting for x
       let myLimit = (pCurrentPoint.x > pPointA.x) ? myHighLimit : myLowLimit; // for x
       let myXLimitFlag = (myLimit == myLowLimit) ? (pCurrentPoint.x <= myLimit) : (pCurrentPoint.x >= myLimit);
 
-      myHighLimit = pContainer.height - pBall.height; // for y; for now it's the same since this is a square
+      myHighLimit = pContainer.height - pBall.diameter; // for y; for now it's the same since this is a square
       myLimit = (pCurrentPoint.y > pPointA.y) ? myHighLimit : myLowLimit; // for y
       let myYLimitFlag = (myLimit == myLowLimit) ? (pCurrentPoint.y <= myLimit) : (pCurrentPoint.y >= myLimit);
 
