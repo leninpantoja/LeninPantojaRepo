@@ -76,7 +76,7 @@ function setObjects(pMainObject, pPontA, pBall, pPontB) {
     let myReboundAngle = null;
     if (myVersion3Flag && !myInitFlag) {
     	myReboundAngle  = calculateReboundAngle(pMainObject.angle, pMainObject.limitReachedXY);
-    	//lap
+    	// lap to-do
     } else {
 	    // just to make sure PointB is different to PointA
 	    do {
