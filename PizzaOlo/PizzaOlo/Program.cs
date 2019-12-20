@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 
 namespace PizzaOlo
 {
@@ -14,23 +10,23 @@ namespace PizzaOlo
     {
         static void Main(string[] args)
         {
-            string myPath = @"E:\Projects\TestProject\PizzaOlo\PizzaOlo\pizzas.json";
-            string myJsonString = ReadJson(myPath); // get jason in a string to separate
-
-            Dictionary<object, int> myToppings = GetToppings(myJsonString); // save toppings in a dictionary with the count
-
+            // get json in a string to separate
+            const string myPath = @"..\..\pizzas.json";
+            string myJsonString = ReadJson(myPath);
+            // get List of toppings
+            List<string> myListOfToppings = GetListOfToppings(myJsonString);
+            // get Dictionary with the Key combination of topping and the number of order
+            Dictionary<string, int> myDictionaryOfToppings = GetDictionaryOfToppings(myListOfToppings);
+            // order by Value desc ONLY the 20 rows
             const int cTop = 20;
-            var myIESortToppings = (from entry in myToppings orderby entry.Value descending select entry).Take(3);
-            List<KeyValuePair<object, int>> mySortToppings = (from entry in myToppings orderby entry.Value descending select entry).Take(cTop).ToList();
-
-            int myRank = 0;
+            List<KeyValuePair<string, int>> mySortToppings = (from entry in myDictionaryOfToppings orderby entry.Value descending select entry).Take(cTop).ToList();
+            // print Results
+            int myRank = 1;
             foreach (var myTopping in mySortToppings)
             {
-                myRank++;
-                //string myToppingString = myTopping.Key.ToString().Split
-                Console.WriteLine("Topping combination: {0}; rank: {1}; number of times ordered: {2}", myTopping.Key, myRank, myTopping.Value);
+                Console.WriteLine("Topping combination: {0}; Rank: {1}; Number of times ordered: {2}", myTopping.Key, myRank++, myTopping.Value);
             }
-
+            // wait
             Console.ReadKey();
         }
         static string ReadJson(string pPath)
@@ -45,48 +41,37 @@ namespace PizzaOlo
             return myJsonString;
         }
 
-        static Dictionary<object, int> GetToppings(string pJsonString)
+        static List<string> GetListOfToppings(string pJsonString)
         {
-            Dictionary<object, int> myToppings = new Dictionary<object, int>();
+            List<string> myListOfToppings = new List<string>();
 
-            var objects = JArray.Parse(pJsonString);
-            foreach (var toppings in objects)
+            var myObjects = JArray.Parse(pJsonString);
+            foreach (var myTopping in myObjects)
             {
-                string myTopping = toppings.ToString();
-                if (myToppings.ContainsKey(myTopping))
-                {
-                    myToppings[myTopping] += 1;
-                }
-                else
-                {
-                    myToppings.Add(myTopping, 1);
-                }
+                JToken myToken = myTopping["toppings"].Value<JToken>();
+                string myStringTopping = string.Join(",", myToken.ToList<object>());
+                myListOfToppings.Add(myStringTopping);
             }
 
-            return myToppings;
+            return myListOfToppings;
         }
-
-        static Dictionary<object, int> GetToppings2(string pJsonString)
+        static Dictionary<string, int> GetDictionaryOfToppings(List<string> myListOfToppings)
         {
-            Dictionary<object, int> myToppings = new Dictionary<object, int>();
+            Dictionary<string, int> myDictionaryOfToppings = new Dictionary<string, int>();
 
-            var objects = JArray.Parse(pJsonString);
-            foreach (var toppings in objects)
+            foreach (string myTopping in myListOfToppings)
             {
-                string myTopping = toppings.ToString();
-                JToken myTest = toppings["toppings"].Value<JToken>();
-                string myVal = myTest.ToString();
-                if (myToppings.ContainsKey(myTopping))
+                if (myDictionaryOfToppings.ContainsKey(myTopping))
                 {
-                    myToppings[myTopping] += 1;
+                    myDictionaryOfToppings[myTopping] += 1;
                 }
                 else
                 {
-                    myToppings.Add(myTopping, 1);
+                    myDictionaryOfToppings.Add(myTopping, 1);
                 }
             }
 
-            return myToppings;
+            return myDictionaryOfToppings;
         }
     }
 }
