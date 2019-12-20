@@ -1,0 +1,9 @@
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.exe.config
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.exe
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.pdb
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\bin\Debug\Newtonsoft.Json.dll
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.csproj.CoreCompileInputs.cache
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.csproj.CopyComplete
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.exe
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.pdb
+E:\Projects\TestProject\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.csprojAssemblyReference.cache
