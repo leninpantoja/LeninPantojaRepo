@@ -85,11 +85,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Projects\\TestProject\\PizzaOlo\\PizzaOlo\\PizzaOlo.csproj",
+      "projectUniqueName": "E:\\Projects\\GitHub\\Repos\\myFirstRepo\\PizzaOlo\\PizzaOlo\\PizzaOlo.csproj",
       "projectName": "PizzaOlo",
-      "projectPath": "E:\\Projects\\TestProject\\PizzaOlo\\PizzaOlo\\PizzaOlo.csproj",
+      "projectPath": "E:\\Projects\\GitHub\\Repos\\myFirstRepo\\PizzaOlo\\PizzaOlo\\PizzaOlo.csproj",
       "packagesPath": "C:\\Users\\u6075078\\.nuget\\packages\\",
-      "outputPath": "E:\\Projects\\TestProject\\PizzaOlo\\PizzaOlo\\obj\\",
+      "outputPath": "E:\\Projects\\GitHub\\Repos\\myFirstRepo\\PizzaOlo\\PizzaOlo\\obj\\",
       "projectStyle": "PackageReference",
       "skipContentFileWrite": true,
       "configFilePaths": [
