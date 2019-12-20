@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace PizzaOlo
 {
     class Program
     {
-        private const string cJsonFileName = @"..\..\pizzas.json";
+        private const string cJsonURL = "http://files.olo.com/pizzas.json";
         private const int cTopMostPopularToppings = 20;
 
         static void Main(string[] args)
         {
             // create my PizzaToppings object
-            PizzaToppings myPizzaToppings = new PizzaToppings(cJsonFileName);
+            PizzaToppings myPizzaToppings = new PizzaToppings(cJsonURL);
             // print results with the Top Most Popular Toppings
             myPizzaToppings.PrintResults(cTopMostPopularToppings);
             // wait
@@ -24,24 +24,33 @@ namespace PizzaOlo
 
     public class PizzaToppings
     {
+        private string _JsonURL;
         private Dictionary<string, int> _DictionaryOfToppings;
 
-        public PizzaToppings(string pJsonFileName)
+        public PizzaToppings(string pJsonURL)
         {
             // get json in a string to separate
-            string myJsonString = ReadJson(pJsonFileName);
+            _JsonURL = pJsonURL;
+            string myJsonString = GetJsonStringFromURL(pJsonURL);
             // get List of toppings
-            List<string> myListOfToppings = GetListOfToppings(myJsonString);
+            List<string> myListOfToppings = GetListOfToppings(myJsonString); // if something wrong with Json string just new list
             // get Dictionary with the Key combination of topping and the number of order
             _DictionaryOfToppings = GetDictionaryOfToppings(myListOfToppings);
         }
-        private string ReadJson(string pJsonFileName)
+        private string GetJsonStringFromURL(string pJsonURL)
         {
             string myJsonString;
 
-            using (StreamReader r = new StreamReader(pJsonFileName))
+            using (WebClient myWebClient = new WebClient())
             {
-                myJsonString = r.ReadToEnd();
+                try
+                {
+                    myJsonString = myWebClient.DownloadString(pJsonURL);
+                }
+                catch (Exception)
+                {
+                    myJsonString = string.Empty;
+                }
             }
 
             return myJsonString;
@@ -50,12 +59,15 @@ namespace PizzaOlo
         {
             List<string> myListOfToppings = new List<string>();
 
-            var myObjects = JArray.Parse(pJsonString);
-            foreach (var myTopping in myObjects)
+            if (!string.IsNullOrWhiteSpace(pJsonString)) // just to make sure Json string is OK
             {
-                JToken myToken = myTopping["toppings"].Value<JToken>();
-                string myStringTopping = string.Join(",", myToken.ToList<object>());
-                myListOfToppings.Add(myStringTopping);
+                var myObjects = JArray.Parse(pJsonString);
+                foreach (var myTopping in myObjects)
+                {
+                    JToken myToken = myTopping["toppings"].Value<JToken>();
+                    string myStringTopping = string.Join(",", myToken.ToList<object>());
+                    myListOfToppings.Add(myStringTopping);
+                }
             }
 
             return myListOfToppings;
@@ -68,7 +80,7 @@ namespace PizzaOlo
             {
                 if (myDictionaryOfToppings.ContainsKey(myTopping))
                 {
-                    myDictionaryOfToppings[myTopping] += 1;
+                    myDictionaryOfToppings[myTopping]++;
                 }
                 else
                 {
@@ -83,10 +95,17 @@ namespace PizzaOlo
             // order by Value desc ONLY the top rows required
             List<KeyValuePair<string, int>> mySortToppings = (from entry in _DictionaryOfToppings orderby entry.Value descending select entry).Take(pTopMostPopularToppings).ToList();
             // print Results
-            int myRank = 1;
-            foreach (KeyValuePair<string, int> myTopping in mySortToppings)
+            if (mySortToppings.Count == 0) // just in case somethig wrong with Jason URL
             {
-                Console.WriteLine("Topping combination: {0}; Rank: {1}; Number of times ordered: {2}", myTopping.Key, myRank++, myTopping.Value);
+                Console.WriteLine("Json URL was not found: {0}", _JsonURL);
+            }
+            else
+            {
+                int myRank = 1;
+                foreach (KeyValuePair<string, int> myTopping in mySortToppings)
+                {
+                    Console.WriteLine("Topping combination: {0}; Rank: {1}; Number of times ordered: {2}", myTopping.Key, myRank++, myTopping.Value);
+                }
             }
         }
     }
