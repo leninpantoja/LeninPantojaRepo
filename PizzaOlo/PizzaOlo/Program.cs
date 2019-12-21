@@ -24,6 +24,8 @@ namespace PizzaOlo
 
     public class PizzaToppings
     {
+        private const string cMainJsonToken = "toppings";
+        private const string cToppingsSeparator = ", ";
         private string _JsonURL;
         private Dictionary<string, int> _DictionaryOfToppings;
 
@@ -59,15 +61,23 @@ namespace PizzaOlo
         {
             List<string> myListOfToppings = new List<string>();
 
-            if (!string.IsNullOrWhiteSpace(pJsonString)) // just to make sure Json string is OK
+            JArray myJarray;
+            try
             {
-                var myObjects = JArray.Parse(pJsonString);
-                foreach (var myTopping in myObjects)
-                {
-                    JToken myToken = myTopping["toppings"].Value<JToken>();
-                    string myStringTopping = string.Join(",", myToken.ToList<object>());
-                    myListOfToppings.Add(myStringTopping);
-                }
+              myJarray = JArray.Parse(pJsonString); // in case something wrong with Json string 
+            }
+            catch (Exception)
+            {
+              myJarray = new JArray(); // just create to continue with the same logic until Results
+            }
+
+            var myIEToppings = myJarray.Value<JArray>().Values<JToken>(cMainJsonToken); // if there is NO token/data to find, so List is just created
+            List<JToken> myObjListOfToppings = myIEToppings.ToList<JToken>();
+            foreach (JToken myObjTopping in myObjListOfToppings)
+            {
+              // convert Toppings to simple string with Separator
+              string myStringToppings = string.Join(cToppingsSeparator, myObjTopping.ToList<object>());
+              myListOfToppings.Add(myStringToppings);
             }
 
             return myListOfToppings;
@@ -95,16 +105,16 @@ namespace PizzaOlo
             // order by Value desc ONLY the top rows required
             List<KeyValuePair<string, int>> mySortToppings = (from entry in _DictionaryOfToppings orderby entry.Value descending select entry).Take(pTopMostPopularToppings).ToList();
             // print Results
-            if (mySortToppings.Count == 0) // just in case somethig wrong with Jason URL
+            if (mySortToppings.Count == 0) // Count = 0, this means something wrong with Json URL or Json format
             {
-                Console.WriteLine("Json URL was not found: {0}", _JsonURL);
+                Console.WriteLine("Json URL was not found OR unexpected Json format : {0}", _JsonURL);
             }
             else
             {
                 int myRank = 1;
                 foreach (KeyValuePair<string, int> myTopping in mySortToppings)
                 {
-                    Console.WriteLine("Topping combination: {0}; Rank: {1}; Number of times ordered: {2}", myTopping.Key, myRank++, myTopping.Value);
+                  Console.WriteLine("Rank: {0}; Number of times ordered: {1}; Topping combinations: {2}", (myRank++).ToString().PadRight(2), myTopping.Value.ToString().PadRight(4), myTopping.Key);
                 }
             }
         }

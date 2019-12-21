@@ -12,7 +12,6 @@ E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.exe
 E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.pdb
 E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\bin\Debug\Newtonsoft.Json.dll
 E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.csprojAssemblyReference.cache
-E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.csproj.CoreCompileInputs.cache
 E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.csproj.CopyComplete
 E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.exe
 E:\Projects\GitHub\Repos\myFirstRepo\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.pdb
