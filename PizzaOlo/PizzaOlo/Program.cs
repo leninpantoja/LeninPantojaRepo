@@ -13,31 +13,43 @@ namespace PizzaOlo
 
         static void Main(string[] args)
         {
-            // create my PizzaToppings object
+            // create my PizzaToppings object and print results with the Top Most Popular Toppings
             PizzaToppings myPizzaToppings = new PizzaToppings(cJsonURL);
-            // print results with the Top Most Popular Toppings
             myPizzaToppings.PrintResults(cTopMostPopularToppings);
+            // myPizzaToppings.AllToppingsRankedResults; *** this can be used for other purposes; datatable/grid results ***
+
             // wait
             Console.ReadKey();
         }
     }
-
+    
     public class PizzaToppings
     {
         private const string cMainJsonToken = "toppings";
         private const string cToppingsSeparator = ", ";
-        private string _JsonURL;
-        private Dictionary<string, int> _DictionaryOfToppings;
+        public class CustomizedType
+        {
+            public int Rank { get; set; }
+            public int TimesOrdered { get; set; }
+            public string Toppings { get; set; }
+        }
+        public List<CustomizedType> AllToppingsRankedResults { get; } // accessible for other purposes
 
         public PizzaToppings(string pJsonURL)
         {
             // get json in a string to separate
-            _JsonURL = pJsonURL;
             string myJsonString = GetJsonStringFromURL(pJsonURL);
-            // get List of toppings
-            List<string> myListOfToppings = GetListOfToppings(myJsonString); // if something wrong with Json string just new list
-            // get Dictionary with the Key combination of topping and the number of order
-            _DictionaryOfToppings = GetDictionaryOfToppings(myListOfToppings);
+
+            // get list of JToken and order the children list to be prepare for: "sausage, beef" and "beef, sausage" as one combination
+            List<List<JToken>> myListOfToppingsOrdered = GetListOfToppingsOrdered(myJsonString);
+
+            // get List of toppings in a simple string with specified separator
+            List<string> myListOfToppings = myListOfToppingsOrdered.Select(x => string.Join(cToppingsSeparator, x)).ToList();
+
+            // Prepare and populate the the customized list with the required logic (ranked)
+            AllToppingsRankedResults = myListOfToppings.GroupBy(x => x).OrderByDescending(x => x.Count())
+                                                       .Select((x, index) => new CustomizedType() { Rank = index + 1, TimesOrdered = x.Count(), Toppings = x.Key })
+                                                       .ToList();
         }
         private string GetJsonStringFromURL(string pJsonURL)
         {
@@ -47,7 +59,7 @@ namespace PizzaOlo
             {
                 try
                 {
-                    myJsonString = myWebClient.DownloadString(pJsonURL);
+                    myJsonString = myWebClient.DownloadString(pJsonURL); // posible error; in case something wrong with Json URL
                 }
                 catch (Exception)
                 {
@@ -57,66 +69,28 @@ namespace PizzaOlo
 
             return myJsonString;
         }
-        private List<string> GetListOfToppings(string pJsonString)
+        private List<List<JToken>> GetListOfToppingsOrdered(string pJsonString)
         {
-            List<string> myListOfToppings = new List<string>();
-
             JArray myJarray;
             try
             {
-              myJarray = JArray.Parse(pJsonString); // in case something wrong with Json string 
+                myJarray = JArray.Parse(pJsonString); // posible error; in case something wrong with Json string 
             }
             catch (Exception)
             {
               myJarray = new JArray(); // just create to continue with the same logic until Results
             }
 
-            var myIEToppings = myJarray.Value<JArray>().Values<JToken>(cMainJsonToken); // if there is NO token/data to find, so List is just created
-            List<JToken> myObjListOfToppings = myIEToppings.ToList<JToken>();
-            foreach (JToken myObjTopping in myObjListOfToppings)
-            {
-              // convert Toppings to simple string with Separator
-              string myStringToppings = string.Join(cToppingsSeparator, myObjTopping.ToList<object>());
-              myListOfToppings.Add(myStringToppings);
-            }
-
-            return myListOfToppings;
-        }
-        private Dictionary<string, int> GetDictionaryOfToppings(List<string> pListOfToppings)
-        {
-            Dictionary<string, int> myDictionaryOfToppings = new Dictionary<string, int>();
-
-            foreach (string myTopping in pListOfToppings)
-            {
-                if (myDictionaryOfToppings.ContainsKey(myTopping))
-                {
-                    myDictionaryOfToppings[myTopping]++;
-                }
-                else
-                {
-                    myDictionaryOfToppings.Add(myTopping, 1);
-                }
-            }
-
-            return myDictionaryOfToppings;
+            // if there is NO token/data to find, so List is just created
+            return myJarray.Values(cMainJsonToken).Select(x => x.OrderBy(o => o).ToList()).ToList();
         }
         public void PrintResults(int pTopMostPopularToppings)
         {
-            // order by Value desc ONLY the top rows required
-            List<KeyValuePair<string, int>> mySortToppings = (from entry in _DictionaryOfToppings orderby entry.Value descending select entry).Take(pTopMostPopularToppings).ToList();
-            // print Results
-            if (mySortToppings.Count == 0) // Count = 0, this means something wrong with Json URL or Json format
-            {
-                Console.WriteLine("Json URL was not found OR unexpected Json format : {0}", _JsonURL);
-            }
+            if (AllToppingsRankedResults.Count == 0) // This means something wrong with Json URL or Json format
+                Console.WriteLine("The provided Json URL was not found OR unexpected Json format.");
             else
-            {
-                int myRank = 1;
-                foreach (KeyValuePair<string, int> myTopping in mySortToppings)
-                {
-                  Console.WriteLine("Rank: {0}; Number of times ordered: {1}; Topping combinations: {2}", (myRank++).ToString().PadRight(2), myTopping.Value.ToString().PadRight(4), myTopping.Key);
-                }
-            }
+                foreach (CustomizedType myItem in AllToppingsRankedResults.Take(pTopMostPopularToppings)) // ONLY the top rows required
+                    Console.WriteLine("Rank: {0}; Number of times ordered: {1}; Topping combinations: {2}", myItem.Rank.ToString().PadRight(2), myItem.TimesOrdered.ToString().PadRight(4), myItem.Toppings);
         }
     }
 }

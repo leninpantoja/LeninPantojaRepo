@@ -1,0 +1,20 @@
+Rank: 1 ; Number of times ordered: 4616; Topping combinations: pepperoni
+Rank: 2 ; Number of times ordered: 1014; Topping combinations: mozzarella cheese
+Rank: 3 ; Number of times ordered: 956 ; Topping combinations: four cheese
+Rank: 4 ; Number of times ordered: 732 ; Topping combinations: bacon
+Rank: 5 ; Number of times ordered: 623 ; Topping combinations: beef
+Rank: 6 ; Number of times ordered: 402 ; Topping combinations: sausage
+Rank: 7 ; Number of times ordered: 361 ; Topping combinations: italian sausage
+Rank: 8 ; Number of times ordered: 229 ; Topping combinations: chicken
+Rank: 9 ; Number of times ordered: 203 ; Topping combinations: four cheese, pepperoni
+Rank: 10; Number of times ordered: 165 ; Topping combinations: ham
+Rank: 11; Number of times ordered: 159 ; Topping combinations: mushrooms
+Rank: 12; Number of times ordered: 155 ; Topping combinations: mozzarella cheese, pepperoni
+Rank: 13; Number of times ordered: 122 ; Topping combinations: beef, pepperoni
+Rank: 14; Number of times ordered: 121 ; Topping combinations: bacon, pepperoni
+Rank: 15; Number of times ordered: 117 ; Topping combinations: black olives
+Rank: 16; Number of times ordered: 101 ; Topping combinations: alredo sauce
+Rank: 17; Number of times ordered: 96  ; Topping combinations: pepperoni, sausage
+Rank: 18; Number of times ordered: 95  ; Topping combinations: cheddar cheese
+Rank: 19; Number of times ordered: 85  ; Topping combinations: italian sausage, pepperoni
+Rank: 20; Number of times ordered: 79  ; Topping combinations: pineapple

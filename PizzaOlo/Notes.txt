@@ -1,0 +1,12 @@
+Vesion 2.0: Better quality of code and and considering the same ingredients with different order as the same combination.
+* ie: "sausage, beef" and "beef, sausage" as one combination
+* Code optimization and better performance
+  -- No loops/iterations to populate data by using more Linq features
+  -- Minimizing collection objects usage (List, Dictionary)
+* Reusable, readable, maintanable and organized
+  -- Access to the processed list for other purposes
+  -- Better sequence in dev logic
+  -- Clear identification of results and data types
+  -- More code documentation to help other devs (easily understand)
+
+NOTE: GitHub gist link is https://gist.github.com/leninpantoja/7616d840ae1120396107f7960a4e01b0
