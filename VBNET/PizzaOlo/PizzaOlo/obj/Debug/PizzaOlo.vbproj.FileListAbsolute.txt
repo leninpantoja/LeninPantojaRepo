@@ -1,0 +1,13 @@
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.exe.config
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.exe
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.pdb
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\bin\Debug\PizzaOlo.xml
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.vbprojAssemblyReference.cache
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.Resources.resources
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.vbproj.GenerateResource.cache
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.exe
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.xml
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.pdb
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\bin\Debug\Newtonsoft.Json.dll
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\bin\Debug\Newtonsoft.Json.xml
+E:\Projects\GitHub\Repos\myFirstRepo\VBNET\PizzaOlo\PizzaOlo\obj\Debug\PizzaOlo.vbproj.CopyComplete
